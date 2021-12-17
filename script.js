@@ -11,6 +11,9 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 let btnRemove = document.querySelectorAll('.workout__btn-remove');
 let btnEdit = document.querySelectorAll('.workout__btn-edit');
+const sortOption = document.querySelector('.sort__select');
+const ascendButt = document.querySelector('.ascend__butt');
+const descendButt = document.querySelector('.descend__butt');
 
 class Workout {
   date = new Date();
@@ -52,6 +55,7 @@ class App {
   #mapEvent;
   #workouts = [];
   #label = '';
+  #ascend = 1;
 
   constructor() {
     this._getPosition();
@@ -59,6 +63,17 @@ class App {
     form.addEventListener('submit', this._newWorkout.bind(this));
     inputType.addEventListener('change', this._toggleElevationField);
     containerWorkouts.addEventListener('click', this._moveScreen.bind(this));
+    sortOption.addEventListener('change', this._sorting.bind(this));
+
+    ascendButt.addEventListener('click', () => {
+      this.#ascend = 1;
+      this._sorting.bind(this)();
+    });
+
+    descendButt.addEventListener('click', () => {
+      this.#ascend = -1;
+      this._sorting.bind(this)();
+    });
   }
 
   _selectAndBindButtons() {
@@ -158,6 +173,8 @@ class App {
     this._setLocalStorage();
 
     this._selectAndBindButtons();
+
+    this._sorting();
   }
 
   _renderWorkoutMarker(workout) {
@@ -254,10 +271,24 @@ class App {
   }
 
   _getLocalStorage() {
+    const createObj = function (dta, Cls) {
+      const obj = new Cls(dta.coords, dta.distance, dta.duration);
+      if (dta.type === 'running') obj.cadence = dta.cadence;
+      if (dta.type === 'cycling') obj.elevationGain = dta.elevationGain;
+      obj.id = dta.id;
+      return obj;
+    };
     const data = JSON.parse(localStorage.getItem('workouts'));
-    if (data != null) data.forEach(dta => (dta.date = new Date(dta.date)));
+    if (data != null)
+      data.forEach(dta => {
+        dta.date = new Date(dta.date);
+        if (dta.type === 'running')
+          this.#workouts.push(createObj(dta, Running));
+
+        if (dta.type === 'cycling')
+          this.#workouts.push(createObj(dta, Cycling));
+      });
     if (!data) return;
-    this.#workouts = data;
   }
 
   _removeWorkout(e) {
@@ -289,6 +320,30 @@ class App {
       i++;
     });
     this.#workouts.forEach(wo => this._renderWorkoutMarker(wo));
+  }
+  _sorting() {
+    const ascend = this.#ascend;
+    if (sortOption.value === 'dur') {
+      this.#workouts.sort(function (a, b) {
+        return ascend * (a.duration - b.duration);
+      });
+    }
+    if (sortOption.value === 'dist') {
+      this.#workouts.sort(function (a, b) {
+        return ascend * (a.distance - b.distance);
+      });
+    }
+    if (sortOption.value === 'ns') {
+      this.#workouts.sort(function (a, b) {
+        return +a.id - +b.id;
+      });
+    }
+    document
+      .querySelectorAll('.workout')
+      .forEach(wo => wo.parentElement.removeChild(wo));
+    this.#workouts.forEach(wo => this._renderWorkoutList(wo));
+    this._selectAndBindButtons();
+    console.log(this.#workouts);
   }
 }
 

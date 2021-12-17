@@ -23,7 +23,7 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css" />
     <script type="text/javascript">
       document.write(
         '<scr' +
@@ -38,6 +38,21 @@
   <body>
     <div class="sidebar">
       <img src="logo.png" alt="Logo" class="logo" />
+      <div class="sort">
+        <select class="sort__select">
+          <option value="ns">-Sort by-</option>
+          <option value="dist">Distance</option>
+          <option value="dur">Duration</option>
+        </select>
+        <i
+          style="font-size: 24px; color: #1c9b1c; cursor: pointer"
+          class="ascend__butt ph-arrow-up"
+        ></i>
+        <i
+          style="font-size: 24px; color: #f2c40f; cursor: pointer"
+          class="descend__butt ph-arrow-down"
+        ></i>
+      </div>
 
       <ul class="workouts">
         <form class="form hidden">

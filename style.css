@@ -157,7 +157,8 @@ a:visited {
   font-weight: 600;
 }
 
-.form__input {
+.form__input,
+.sort__select {
   width: 100%;
   padding: 0.3rem 1.1rem;
   font-family: inherit;
@@ -222,6 +223,14 @@ a:visited {
 .cycling-popup .leaflet-popup-content-wrapper {
   border-left: 5px solid var(--color-brand--1);
 }
+.sort {
+  display: flex;
+}
+.sort__select{
+  font-size: 1.2rem;
+  width: 25%;
+  margin-bottom: 1rem;
+}
 
 @media screen and (max-width: 724px) {
   body {
@@ -259,10 +268,10 @@ a:visited {
   .form__input {
     padding: 0.2rem 0.5rem;
     font-size: 1.2rem;
-}
-.workout__btn{
-  margin-left: 1rem;
-}
+  }
+  .workout__btn {
+    margin-left: 1rem;
+  }
 }
 @media screen and (max-width: 350px) {
   .workout {
