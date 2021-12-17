@@ -23,10 +23,16 @@
       href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap"
       rel="stylesheet"
     />
-
-    <link rel="stylesheet" href="style.css" />
-
-    <script defer src="script.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <script type="text/javascript">
+      document.write(
+        '<scr' +
+          'ipt src="script.js?' +
+          Math.random() +
+          ' "defer></scr' +
+          'ipt>'
+      );
+    </script>
     <title>mapty // Map your workouts</title>
   </head>
   <body>
@@ -68,10 +74,13 @@
             />
           </div>
           <div class="form__btn-container">
-            <button class="form__btn form__btn-submit"><i style="color: #038303;" class="ph-check"></i></button>
-            <button class="form__btn form__btn-remove"><i style="color: #c01111;" class="ph-trash"></i></button>
+            <button class="form__btn form__btn-submit">
+              <i style="color: #038303" class="ph-check"></i>
+            </button>
+            <button class="form__btn form__btn-remove">
+              <i style="color: #c01111" class="ph-trash"></i>
+            </button>
           </div>
-
         </form>
       </ul>
     </div>
