@@ -255,10 +255,9 @@ class App {
 
   _getLocalStorage() {
     const data = JSON.parse(localStorage.getItem('workouts'));
-    if (date != null) data.forEach(dta => (dta.date = new Date(dta.date)));
-
+    if (date == null) return
+    data.forEach(dta => (dta.date = new Date(dta.date)));
     if (!data) return;
-
     this.#workouts = data;
   }
 
