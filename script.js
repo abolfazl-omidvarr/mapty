@@ -295,7 +295,7 @@ class App {
     e.stopPropagation();
 
     //identifying html element and workout list
-    const workoutList = e.path[1].closest('.workout');
+    const workoutList = e.target.closest('.workout');
     const id = workoutList.dataset.id;
     const index = this.#workouts.indexOf(
       this.#workouts.find(wo => wo.id === id)
