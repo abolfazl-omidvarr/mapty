@@ -11,6 +11,7 @@ const inputCadence = document.querySelector('.form__input--cadence');
 const inputElevation = document.querySelector('.form__input--elevation');
 let btnRemove = document.querySelectorAll('.workout__btn-remove');
 let btnEdit = document.querySelectorAll('.workout__btn-edit');
+const formButtRem = document.querySelector('.form__btn-remove');
 const sortOption = document.querySelector('.sort__select');
 const ascendButt = document.querySelector('.ascend__butt');
 const descendButt = document.querySelector('.descend__butt');
@@ -61,7 +62,12 @@ class App {
     this._getPosition();
     this._getLocalStorage();
     form.addEventListener('submit', this._newWorkout.bind(this));
-    inputType.addEventListener('change', this._toggleElevationField);
+
+    inputType.addEventListener(
+      'change',
+      this._toggleElevationField.bind(this, inputCadence, inputElevation)
+    );
+
     containerWorkouts.addEventListener('click', this._moveScreen.bind(this));
     sortOption.addEventListener('change', this._sorting.bind(this));
 
@@ -74,13 +80,38 @@ class App {
       this.#ascend = -1;
       this._sorting.bind(this)();
     });
+    formButtRem.addEventListener('click', e => {
+      e.preventDefault();
+      this._hideForm(1);
+    });
   }
+  _formValidation(type, distance, duration, cadence, elevation) {
+    const validCheck = (...inputs) => inputs.every(inp => Number.isFinite(inp));
+    const allPositive = (...inputs) => inputs.every(inp => inp > 0);
+    if (type === 'running') {
+      if (
+        !validCheck(distance, duration, cadence) ||
+        !allPositive(distance, duration, cadence)
+      )
+        return 1;
+    }
 
+    if (type === 'cycling') {
+      if (
+        !validCheck(distance, duration, elevation) ||
+        !allPositive(distance, duration)
+      )
+        return 1;
+    }
+  }
   _selectAndBindButtons() {
     btnRemove = document.querySelectorAll('.workout__btn-remove');
     btnEdit = document.querySelectorAll('.workout__btn-edit');
     btnRemove.forEach(btn => {
       btn.addEventListener('click', this._removeWorkout.bind(this));
+    });
+    btnEdit.forEach(btn => {
+      btn.addEventListener('click', this._editing.bind(this));
     });
   }
 
@@ -115,51 +146,47 @@ class App {
     inputDistance.focus();
   }
 
-  _hideForm() {
-    form.style.display = 'none';
-    form.classList.add('hidden');
-    setTimeout(() => (form.style.display = 'grid'), 1000);
+  _hideForm(status = 0) {
+    if (status === 1) {
+      form.classList.add('hidden');
+    }
+    if (status === 0) {
+      form.style.display = 'none';
+      form.classList.add('hidden');
+      setTimeout(() => (form.style.display = 'grid'), 1000);
+    }
   }
 
-  _toggleElevationField() {
-    inputCadence.closest('.form__row').classList.toggle('form__row--hidden');
-    inputElevation.closest('.form__row').classList.toggle('form__row--hidden');
+  _toggleElevationField(cad, elev) {
+    cad.closest('.form__row').classList.toggle('form__row--hidden');
+    elev.closest('.form__row').classList.toggle('form__row--hidden');
   }
 
   _newWorkout(e) {
     e.preventDefault();
-    const validCheck = (...inputs) => inputs.every(inp => Number.isFinite(inp));
-    const allPositive = (...inputs) => inputs.every(inp => inp > 0);
     const type = inputType.value;
     const distance = +inputDistance.value;
     const duration = +inputDuration.value;
+    if (!this.#mapEvent) return;
     const { lat, lng } = this.#mapEvent.latlng;
     let workout;
 
     if (type === 'running') {
       const cadence = +inputCadence.value;
-      if (
-        !validCheck(distance, duration, cadence) ||
-        !allPositive(distance, duration, cadence)
-      )
-        return alert('invalid input');
-
+      if (this._formValidation(type, distance, duration, cadence, ''))
+        return alert('Invalid Inputs');
       workout = new Running([lat, lng], distance, duration, cadence);
     }
 
     if (type === 'cycling') {
       const elevation = +inputElevation.value;
-      if (
-        !validCheck(distance, duration, elevation) ||
-        !allPositive(distance, duration)
-      )
-        return alert('invalid input');
-
+      if (this._formValidation(type, distance, duration, '', elevation))
+        return alert('Invalid Inputs');
       workout = new Cycling([lat, lng], distance, duration, elevation);
     }
     this.#workouts.push(workout);
 
-    this._renderWorkoutList(workout);
+    this._renderWorkoutList(workout, form);
     this._renderWorkoutMarker(workout);
 
     inputDistance.value =
@@ -175,6 +202,7 @@ class App {
     this._selectAndBindButtons();
 
     this._sorting();
+
   }
 
   _renderWorkoutMarker(workout) {
@@ -293,7 +321,6 @@ class App {
 
   _removeWorkout(e) {
     e.stopPropagation();
-
     //identifying html element and workout list
     const workoutList = e.target.closest('.workout');
     const id = workoutList.dataset.id;
@@ -343,7 +370,151 @@ class App {
       .forEach(wo => wo.parentElement.removeChild(wo));
     this.#workouts.forEach(wo => this._renderWorkoutList(wo));
     this._selectAndBindButtons();
-    console.log(this.#workouts);
+  }
+
+  #lastObj; //editing memory
+  _editing(e) {
+    //close open forms by clicking on other workout's edit butt
+    if (this.#lastObj) {
+      const lastForm = Array.from(document.getElementsByClassName('form-edit'));
+      if (lastForm.length > 0) {
+        lastForm[0].parentNode.removeChild(lastForm[0]);
+        this._renderWorkoutList(this.#lastObj);
+        this._sorting();
+        return;
+      }
+    }
+
+    //select workout to and edit extract its ID
+    const workout = e.target.closest('.workout');
+    const workoutId = workout.dataset.id;
+
+    //extract object to edit
+    let editObj;
+    this.#workouts.forEach(wo => {
+      if (wo.id === workoutId) editObj = wo;
+    });
+
+    this.#lastObj = editObj;
+
+    // this._renderWorkoutList(editObj)
+    const formHtml = `
+    <form class="form form-edit">
+    <div class="form__row">
+      <label class="form__label">Type</label>
+      <select class="form__input form-edit__input--type">
+        <option value="running">Running</option>
+        <option value="cycling">Cycling</option>
+      </select>
+    </div>
+    <div class="form__row">
+      <label class="form__label">Distance</label>
+      <input class="form__input form-edit__input--distance" placeholder="km" />
+    </div>
+    <div class="form__row">
+      <label class="form__label">Duration</label>
+      <input
+        class="form__input form-edit__input--duration"
+        placeholder="min"
+      />
+    </div>
+    <div class="form__row ${
+      editObj.type === 'cycling' ? 'form__row--hidden' : ''
+    }">
+      <label class="form__label">Cadence</label>
+      <input
+        class="form__input form-edit__input--cadence"
+        placeholder="step/min"
+      />
+    </div>
+    <div class="form__row ${
+      editObj.type === 'running' ? 'form__row--hidden' : ''
+    }">
+      <label class="form__label">Elev Gain</label>
+      <input
+        class="form__input form-edit__input--elevation"
+        placeholder="meters"
+      />
+    </div>
+    <div class="form__btn-container">
+      <button class="form__btn form-edit__btn-submit">
+        <i style="color: #038303" class="ph-check"></i>
+      </button>
+      <button class="form__btn form-edit__btn-remove">
+        <i style="color: #c01111" class="ph-x"></i>
+      </button>
+    </div>
+  </form>
+    `;
+
+    //DOM manipulation and selecting edit-form elements
+    workout.insertAdjacentHTML('afterend', formHtml);
+    workout.parentNode.removeChild(workout);
+    const form = document.querySelector('.form-edit');
+    const inputType = document.querySelector('.form-edit__input--type');
+    const inputDistance = document.querySelector('.form-edit__input--distance');
+    const inputDuration = document.querySelector('.form-edit__input--duration');
+    const inputCadence = document.querySelector('.form-edit__input--cadence');
+    const inputElevation = document.querySelector(
+      '.form-edit__input--elevation'
+    );
+    // const cancel = document.querySelector('.');
+
+    inputType.value = editObj.type;
+    inputDistance.value = editObj.distance;
+    inputDuration.value = editObj.duration;
+    if (editObj.type === 'running') {
+      inputCadence.value = editObj.cadence;
+      inputElevation.value = null;
+    }
+    if (editObj.type === 'cycling') {
+      inputCadence.value = null;
+      inputElevation.value = editObj.elevationGain;
+    }
+
+    //add event listener to submit button and workout option
+    inputType.addEventListener(
+      'change',
+      this._toggleElevationField.bind(this, inputCadence, inputElevation)
+    );
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      //create new object and replace old one by new one
+      let obj;
+      if (inputType.value === 'running') {
+        obj = new Running(
+          editObj.coords,
+          +inputDistance.value,
+          +inputDuration.value,
+          +inputCadence.value
+        );
+      }
+      if (inputType.value === 'cycling') {
+        obj = new Cycling(
+          editObj.coords,
+          +inputDistance.value,
+          +inputDuration.value,
+          +inputElevation.value
+        );
+      }
+      obj.id = editObj.id; //make the identical by id
+
+      //update workouts list
+      const index = this.#workouts.indexOf(
+        this.#workouts.find(wo => wo.id === editObj.id)
+      );
+
+      this.#workouts.splice(index, 1);
+      this.#workouts.push(obj);
+
+      //update local storage
+      this._setLocalStorage();
+      //hide form and show workout list and sort
+      e.target.parentNode.removeChild(e.target);
+      this._renderWorkoutList(editObj);
+      this._sorting();
+    });
   }
 }
 

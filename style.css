@@ -168,6 +168,10 @@ a:visited {
   background-color: var(--color-light--3);
   transition: all 0.2s;
 }
+.form__input--type{
+  font-size: 1.2rem;
+  padding: 0.3rem 0rem;
+}
 
 .form__input:focus {
   outline: none;
