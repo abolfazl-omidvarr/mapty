@@ -230,10 +230,11 @@ a:visited {
 .sort {
   display: flex;
 }
-.sort__select{
+.sort__select {
   font-size: 1.2rem;
   width: 25%;
   margin-bottom: 1rem;
+  margin-left: 2rem;
 }
 
 @media screen and (max-width: 724px) {
