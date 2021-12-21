@@ -211,8 +211,8 @@ class App {
       .addTo(this.#map)
       .bindPopup(
         L.popup({
-          maxWidth: 250,
-          minWidth: 250,
+          maxWidth: 150,
+          minWidth: 150,
           closeOnClick: false,
           autoClose: false,
           className: `${workout.type}-popup`,

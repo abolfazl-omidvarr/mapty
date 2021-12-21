@@ -168,7 +168,7 @@ a:visited {
   background-color: var(--color-light--3);
   transition: all 0.2s;
 }
-.form__input--type{
+.form__input--type {
   font-size: 1.2rem;
   padding: 0.3rem 0rem;
 }
@@ -210,11 +210,11 @@ a:visited {
   background-color: var(--color-dark--1);
   color: var(--color-light--2);
   border-radius: 5px;
-  padding-right: 0.6rem;
+  padding-right: 0rem;
 }
 
 .leaflet-popup .leaflet-popup-content {
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 .leaflet-popup .leaflet-popup-tip {
@@ -229,12 +229,13 @@ a:visited {
 }
 .sort {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 .sort__select {
   font-size: 1.2rem;
   width: 25%;
   margin-bottom: 1rem;
-  margin-left: 2rem;
 }
 
 @media screen and (max-width: 724px) {
@@ -256,11 +257,13 @@ a:visited {
     border-radius: 5px;
     padding: 1rem 0.5rem;
     margin-bottom: 0.5rem;
-    transform: scale(0.8);
     gap: 0.45rem 1rem;
   }
   .workout__title {
     font-size: 1.5rem;
+  }
+  .workouts {
+    padding: 0rem 5rem;
   }
   .form {
     padding: 1.5rem 1.25rem;
@@ -277,9 +280,36 @@ a:visited {
   .workout__btn {
     margin-left: 1rem;
   }
-}
-@media screen and (max-width: 350px) {
-  .workout {
-    transform: scale(0.8);
+  .form__btn-container{
+    margin-top: 5px;
+  }
+  .sort{
+    padding: 0 9%;
+  }
+  .workout__value {
+    font-size: min(1.5rem,3.2vw);
+  }
+  
+  .workout__unit {
+    font-size: 1.1rem;
   }
 }
+@media screen and (max-width: 460px) {
+  .workouts {
+    padding: 0rem 3rem;
+  }
+  .workout {
+    gap: 0.2rem 0.5rem;
+}
+.workouts {
+  padding: 0rem 0rem;
+}
+.sort{
+  padding: 0 0%;
+}
+.leaflet-popup .leaflet-popup-content {
+  font-size: 1.2rem;
+  width: 200px;
+}
+}
+
